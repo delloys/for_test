@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/html">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" type="text/css" href="/static/CSS/style.css" />
+    <title>Страничка</title>
+    {% import "macros.html" as macros %}
+</head>
+<body>
+    <div id="zatemnenie">
+        <div id="block_view2">
+        {{macros.render_view(info,check_rent)}}
+        </div>
+    </div>
+    <div id="zatemnenie_rent">
+        <div id="block_view3">
+        {{macros.render_rent(client,info,id_bike,len)}}
+        </div>
+    </div>
+    <div id="zatemnenie_return">
+        <div id="block_view4">
+        {{macros.render_return(get_bike,damage,id_bike,count_plus,len,str,list_dmg,list_num,df_br,date_ret,date_issue,pay_day,pledge,itogo)}}
+        </div>
+    </div>
+<div class=menu>
+     <ul>
+         <li class = active>Поиск</li>
+     </ul>
+ </div>
+
+<div class="WALL">
+
+    <div class="side_block">
+        <form action="{{url_for('index')}}" method="post">
+            {% for df, name_df, view in zip(list_df,sections,list_ch) %}
+            {{ macros.render_side(df,name_df,view,len) }}
+            {% endfor %}
+            <p class="form_button">
+               <input class="btn1" type="submit" value="Найти">
+               <input class="btn2" type="submit" name="clear" value="Очистить">
+            </p>
+
+        </form>
+    </div>
+
+    <div class="center_block">
+
+        {{macros.render_wall(bike,rent_bike,len,dmg_check,dmg_for_bike,get_one_dmg,df_br)}}
+        </div>
+
+</div>
+</body>
+</html>

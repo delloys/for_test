@@ -1,0 +1,304 @@
+{% macro render_wall_block(i,relation,check_rent,len,dmg_for_bike,dmg_df,get_one_dmg,df_br) %}
+    {% if i in relation.index %}
+        <div class="wall_block">
+            <div class="text_block">
+                {% for name in relation.dtypes.index %}
+                    {% if name != "id_bike" %}
+                        <div class="text_block_name">{{name}}:</div><div class="text_block_value"> {{relation.loc[i,name]}}</div>
+                        <input hidden type="text" name={{name}} value="{{ relation.loc[i,name] }}">
+                    {% endif %}
+                {% endfor %}
+                <div id="show_damage">
+                    <div id="block_view5">
+                        {{render_table(get_one_dmg,i,len)}}
+                        <input type="button" onclick="window.location='{{url_for('index')}}'" class="btn1" value="Закрыть">
+                    </div>
+                </div>
+
+                {% if relation.loc[i,'id_bike'] in dmg_for_bike %}
+                <form action="#show_damage">
+                    <input hidden type="text" name=id_bike value="{{ relation.loc[i,'id_bike'] }}">
+                <button class="btn_damage"><img src="/static/images/icon.png" alt="Зонтик"
+                                 style="vertical-align: middle">  Повреждения</button>
+                    </form>
+                {% else %}
+                <button disabled class="btn_damage">Повреждения</button>
+                {% endif %}
+            </div>
+        <div class="form_button">
+            {% if relation.loc[i,'id_bike'] in check_rent %}
+            <form action="#zatemnenie_return" method="get">
+                <input hidden type="text" name=id_bike_return value="{{ relation.loc[i,'id_bike'] }}">
+                <input type="submit" class="btn1" value="Сдать">
+            </form>
+            <form action="#zatemnenie_rent" method="get">
+                    <input type="submit" class="btn2" disabled value="Арендовать">
+                <input hidden type="text" name=id_bike value="{{ relation.loc[i,'id_bike'] }}">
+            </form>
+            {% else %}
+            <form action="#zatemnenie" method="get">
+                <input type="submit" class="btn1" value="Просмотр">
+                <input hidden type="text" name=id_bike value="{{ relation.loc[i,'id_bike'] }}">
+            </form>
+            <form action="#zatemnenie_rent" method="get">
+                    <input type="submit" class="btn2" value="Арендовать">
+                <input hidden type="text" name=id_bike value="{{ relation.loc[i,'id_bike'] }}">
+            </form>
+            {% endif %}
+        </div>
+        </div>
+    {% endif %}
+{% endmacro %}
+
+{% macro render_table(relation, id, len) %}
+{% set n = len(relation) %}
+<table>
+    <tr>
+        {% for name in relation.dtypes.index %}
+        {% if name != 'id_bike' %}
+        <th>{{ name }}</th>
+        {% endif %}
+        {% endfor %}
+    </tr>
+    <tbody>
+
+    {% for i in range(n) %}
+    <tr>
+        {% for name in relation.dtypes.index %}
+        {% if name != 'id_bike' %}
+        <td>
+            {{ relation.loc[i, name] }}
+        </td>
+        {% endif %}
+        {% endfor %}
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% endmacro %}
+
+{% macro render_view(relation,check_rent) %}
+    <div class="blackout">
+        <div class="text_block">
+                {% for name in relation.dtypes.index %}
+                    {% if name != "id_bike" %}
+                        <div class="text_block_name">{{name}}:</div><div class="text_block_value"> {{relation.loc[0,name]}}</div>
+
+                    {% endif %}
+                {% endfor %}
+            </div>
+        <div class="block_view_img">
+            <img width=100% src="/static/images/bicycle.png">
+        </div>
+    </div>
+        {% if relation.loc[0,'id_bike'] in check_rent %}
+        <div class="form_button">
+            <input type="button" onclick="window.location='{{url_for('index')}}'" class="btn1" value="Закрыть">
+            <form action="#zatemnenie_rent" method="get">
+                <input type="submit" class="btn2" disabled value="Арендовать">
+                <input hidden type="text" name=id_bike value="{{ relation.loc[0,'id_bike'] }}">
+            </form>
+        </div>
+        {% else %}
+        <div class="form_button">
+            <input type="button" onclick="window.location='{{url_for('index')}}'" class="btn1" value="Закрыть">
+            <form action="#zatemnenie_rent" method="get">
+                <input type="submit" class="btn2" value="Арендовать">
+                <input hidden type="text" name=id_bike value="{{ relation.loc[0,'id_bike'] }}">
+            </form>
+        </div>
+        {% endif %}
+{% endmacro %}
+
+{% macro render_return(relation1,relation2,id_client,count_plus,len,str,list_dmg,list_num,df_br,date_ret,date_issue,pay_day,pledge,itogo) %}
+    <div class="block_view_text">
+            <form action="{{ url_for('index') }}" class="form_button" method="get">
+            <div class="text_block_return">
+                {% for name in relation1.dtypes.index %}
+                    {% if name != "id_bike" %}
+                        <div class="text_block_name">{{name}}:</div><div class="text_block_value"> {{relation1.loc[0,name]}}</div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+                <input hidden type="text" name="date_return" value="{{date_ret}}">
+                <input hidden type="text" name=id_bike_return value="{{ relation1.loc[0,'id_bike'] }}">
+                <input hidden type="text" name=idbike_rental value="{{ df_br.loc[0,'idbike_rental'] }}">
+
+                {% for i in range(len(list_dmg)) %}
+                    <input hidden type="text"
+                           name="{{'damage' + str(i)}}" value="{{list_dmg[i]}}">
+                    <input hidden type="text"
+                           name="{{'num' + str(i)}}" value="{{list_num[i]}}">
+                {% endfor %}
+                <input type="submit" class="btn1" name="return_bike" value="Сдать">
+                <input type="button" onclick="window.location='{{url_for('index')}}'" class="btn2" value="Отменить">
+            </form>
+            <form>
+                <div class="block_down">
+                    <input hidden type="text" name="date_issue_check" value="{{date_issue.loc[0,'date_issue']}}">
+                    <input hidden type="text" name="pay_check" value="{{pay_day.loc[0,'price_type']}}">
+                    <input hidden type="text" name="pledge" value="{{pledge.loc[0,'pledge']}}">
+                    {% if date_ret !='' %}
+                        <p>Дата возврата: <input type="date" value="{{date_ret}}" min="{{relation1.loc[0,'date_issue']}}" name="date_return"></p>
+                    {% else %}
+                        <p>Дата возврата: <input type="date" min="{{relation1.loc[0,'date_issue']}}" name="date_return"></p>
+                    {% endif %}
+                        {{render_form2(relation2,id_client,count_plus,len,str,list_dmg,list_num)}}
+                        <button name="confirm" value="1">Подтвердить</button>
+                    <p>ИТОГО: {{itogo}}</p>
+                </div>
+            </form>
+    </div>
+
+{% endmacro %}
+
+{% macro render_rent(relation,info,id_client,len) %}
+        <div class="block_view_text">
+            <form action="{{ url_for('index') }}" class="form_button" method="get">
+                <div class="text_block">
+                {% for name in info.dtypes.index %}
+                    {% if name != "id_bike" %}
+                        <div class="text_block_name">{{name}}:</div><div class="text_block_value"> {{info.loc[0,name]}}</div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+                ФИО: {{render_form(relation,id_client,len)}}
+                <p>Дата выдачи: <input type="date" name="date_issue" required></p>
+                <input hidden type="text" name=id_bike_rent value="{{ info.loc[0,'id_bike'] }}">
+                <input type="submit" class="btn1" value="Арендовать">
+                <input type="button" onclick="window.location='{{url_for('index')}}'" class="btn2" value="Отменить">
+
+            </form>
+</div>
+
+
+{% endmacro %}
+
+{% macro render_wall(relation,check_rent,len,dmg_for_bike,dmg_df,get_one_dmg,df_br) %}
+{% set n = len(relation) %}
+    {% for i in range(0,n,4) %}
+            <div class="wall_line">
+                {{ render_wall_block(i,relation,check_rent,len,dmg_for_bike,dmg_df,get_one_dmg,df_br) }}
+                {{ render_wall_block(i+1,relation,check_rent,len,dmg_for_bike,dmg_df,get_one_dmg,df_br) }}
+                {{ render_wall_block(i+2,relation,check_rent,len,dmg_for_bike,dmg_df,get_one_dmg,df_br) }}
+                {{ render_wall_block(i+3,relation,check_rent,len,dmg_for_bike,dmg_df,get_one_dmg,df_br) }}
+            </div>
+    {% endfor %}
+{% endmacro %}
+
+{% macro render_side(relation,title,choice,len) %}
+     <div class="side">
+        <p><b>{{title}}</b></p>
+        {% set n = len(relation) %}
+         {% if title == "Наличие" %}
+                <div>
+                <input type="radio" name="Наличие"
+                       {% set value=relation.loc[1,'text'] %}
+                           value="{{ value }}"
+                    {% if value == choice %}
+                           checked
+                    {% endif %}>В наличии
+                <div><input type="radio" name="Наличие"
+                            {% set value=relation.loc[0,'text'] %}
+                           value="{{ value }}"
+                    {% if value == choice %}
+                           checked
+                    {% endif %}>Отсутствуют</div>
+            </div>
+         {% else %}
+         {% for i in range(n) %}
+                <div>
+                    <input type="checkbox" name={{title}}
+                           {% set value=relation.loc[i,'Название'] %}
+                           value="{{ value }}"
+                    {% if value in choice %}
+                           checked
+                    {% endif %}
+                    >
+                    {{value}} ({{relation.loc[i,'Количество']}})
+                 </div>
+        {% endfor %}
+         {% endif %}
+
+     </div>
+{% endmacro %}
+
+<!-- Макрос для формирования поля со списком -->
+{% macro render_form2(relation, id_client, count_plus, len,str,list_dmg,list_num) %}
+<div class="view_text">
+{% for i in range(0,count_plus + 1) %}
+    <p>Тип повреждения:</p>
+<select name="{{'damage' + str(i)}}">
+    <option value="">
+    {% set n = len(relation) %}
+    <!-- формируем строки списка (каждое значение поля reader_name - строка списка) в виде <option [selected] value = код_читателя> ФИО </option> -->
+    {% for i in range(n) %}
+    {% set id_c = relation.loc[i, "id_damage"] %}
+    {% if str(id_c) == list_dmg[0] %}
+        <option selected value="{{id_c}}" >
+        {{ relation.loc[i, "damage_name"] }} ({{relation.loc[i,"damage_price"]}})
+    <!-- атрибут value элемента будет совпадать с id читателя -->
+    {% else %}
+    <option value={{id_c}}>
+        {{ relation.loc[i, "damage_name"] }} ({{relation.loc[i,"damage_price"]}})
+    </option>
+    {% endif %}
+    {% endfor %}
+</select>
+        <p>Стоимость повреждения:
+        {% if len(list_num) != 0 %}
+            {% if i > 0 %}
+                <input type="number" min="0" name="{{'num' + str(i)}}" value="{{list_num[i]}}">
+            {% else %}
+                <input type="number" min="0" name="{{'num' + str(i)}}" value="{{list_num[i]}}">
+                    <input type="submit" value="+">
+                <input hidden type="text" name=id_bike_return
+                       {% set id_c = id_client %}
+                       value="{{id_c}}">
+                <input hidden type="plus" name=count_dmg
+                       {% set c_p = count_plus %}
+                       value="{{c_p}}">
+            {% endif %}
+        {% else %}
+            {% if i > 0 %}
+                <input type="number" min="0" name="{{'num' + str(i)}}">
+            {% else %}
+                <input type="number" min="0" name="{{'num' + str(i)}}">
+                    <input type="submit" value="+">
+                <input hidden type="text" name=id_bike_return
+                       {% set id_c = id_client %}
+                       value="{{id_c}}">
+                <input hidden type="plus" name=count_dmg
+                       {% set c_p = count_plus %}
+                       value="{{c_p}}">
+            {% endif %}
+        {% endif %}
+        </p>
+
+    {% if len(list_dmg) != 0 and count_plus + 1 > 0 %}
+        {{ list_dmg.pop(0) }}
+    {% endif %}
+{% endfor %}
+    </div>
+{% endmacro %}
+
+<!-- Макрос для формирования поля со списком -->
+{% macro render_form(relation, id_client, len) %}
+<select name="client" required>
+    <option value="">
+    {% set n = len(relation) %}
+    <!-- формируем строки списка (каждое значение поля reader_name - строка списка) в виде <option [selected] value = код_читателя> ФИО </option> -->
+    {% for i in range(n) %}
+    {% set id_c = relation.loc[i, "id_client"] %}
+    <!-- атрибут value элемента будет совпадать с id читателя -->
+    {% if id_c == id_client %}
+    <!-- если код читателя из таблицы совпадает с кодом текущего читателя устанавливаем атрибут selected -->
+    <option selected value={{id_c}}>
+        {% else %}
+    <option value={{id_c}}>
+        {% endif %}
+        {{ relation.loc[i, "full_name"] }}
+    </option>
+    {% endfor %}
+</select>
+{% endmacro %}
